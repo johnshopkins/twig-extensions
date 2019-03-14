@@ -1,0 +1,16 @@
+{
+  "name": "johnshopkins/twig-extensions",
+  "version": "0.1",
+  "authors": [
+    {
+      "name": "Jen Wachter",
+      "email": "jwachter@jhu.edu"
+    }
+  ],
+  "require": {},
+  "autoload": {
+    "psr-4": {
+      "TwigExtensions\\": ["/src/"]
+    }
+  }
+}
