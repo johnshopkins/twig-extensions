@@ -80,7 +80,6 @@ class getHubImage
     $attributes = [
       'src' => $image['sizes'][$options['size']],
       'alt' => $image['alt_text'],
-      'title' => $image['title'],
       'class' => 'column',
       'srcset' => $image['srcsets'][$srcset],
       'sizes' => implode(', ', $options['mediaConditions'])
