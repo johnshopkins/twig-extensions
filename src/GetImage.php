@@ -8,7 +8,7 @@ class GetImage
 
   protected $defaults = [
     // display size
-    'size' => 'medium_thumb',
+    'size' => 'thumbnail',
 
     // media conditions and the image size required by each condition (image sizes attribute)
     'mediaConditions' => [],
