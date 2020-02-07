@@ -71,11 +71,7 @@ class getHubImage
 
   protected function getImgTag($image, $options)
   {
-    // which set to use
-    $srcset = 'scaled';
-    if (in_array($options['size'], ['thumbnail', 'landscape'])) {
-      $srcset = 'cropped-landscape';
-    }
+    $srcset = $options['srcset'];
 
     $attributes = [
       'src' => $image['sizes'][$options['size']],
