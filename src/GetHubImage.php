@@ -71,7 +71,7 @@ class getHubImage
 
   protected function getImgTag($image, $options)
   {
-    $srcset = $options['srcset'];
+    $srcset = $options['srcset'] ?? 'scaled';
 
     $attributes = [
       'src' => $image['sizes'][$options['size']],
