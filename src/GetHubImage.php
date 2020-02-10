@@ -7,8 +7,8 @@ class getHubImage
   protected $extension;
 
   protected $defaults = [
-    // display size
-    'size' => 'thumbnail',
+    // image to place in src attribute
+    'defaultSize' => 'thumbnail',
 
     // media conditions and the image size required by each condition (image sizes attribute)
     'mediaConditions' => [],
@@ -74,11 +74,11 @@ class getHubImage
     $srcset = $options['srcset'] ?? 'scaled';
 
     $attributes = [
-      'src' => $image['sizes'][$options['size']],
       'alt' => $image['alt_text'],
       'class' => 'column',
       'srcset' => $image['srcsets'][$srcset],
       'sizes' => implode(', ', $options['mediaConditions'])
+      'src' => $image['sizes'][$options['defaultSize']],
     ];
 
     $attributes = array_map(function ($key) use ($attributes) {
