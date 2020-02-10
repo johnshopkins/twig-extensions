@@ -20,8 +20,22 @@ class getHubImage
     'showCaption' => true
   ];
 
-  public function __construct()
+  protected $responsiveWidths = [
+    'min-width: 1680px', // above 1680px
+    'min-width: 1366px', // 1366-1680px
+    'min-width: 1280px', // 1280-1366px
+    'min-width: 1024px', // 1024-1280px
+    'min-width: 800px',  // 800-1024px
+    'min-width: 640px',  // 640-800px
+    ''                   // below 640px
+  ];
+
+  public function __construct($responsiveWidths = [])
   {
+    if (!empty($responsiveWidths)) {
+      $this->responsiveWidths = $responsiveWidths;
+    }
+
     $this->extension = new \Twig_SimpleFunction('getHubImage', [$this, 'getHubImage']);
   }
 
@@ -71,15 +85,26 @@ class getHubImage
 
   protected function getImgTag($image, $options)
   {
-    $srcset = $options['srcset'] ?? 'scaled';
-
     $attributes = [
-      'alt' => $image['alt_text'],
-      'class' => 'column',
-      'srcset' => $image['srcsets'][$srcset],
-      'sizes' => implode(', ', $options['mediaConditions'])
       'src' => $image['sizes'][$options['defaultSize']],
+      'alt' => $image['alt_text'] ?? '',
+      'class' => 'column'
     ];
+
+    if (!empty($options['responsiveSizes'])) {
+      $attributes['sizes'] = [];
+
+      for ($i = 0; $i < count($this->responsiveWidths); $i++) {
+        $width = $this->responsiveWidths[$i];
+        $size = $options['responsiveSizes'][$i];
+        $attributes['sizes'][] = !empty($width) ? "({$width}) {$size}px": "{$size}px";
+      }
+
+      $attributes['sizes'] = implode(', ', $attributes['sizes']);
+
+      $srcset = $options['srcset'] ?? 'scaled';
+      $attributes['srcset'] = $image['srcsets'][$srcset];
+    }
 
     $attributes = array_map(function ($key) use ($attributes) {
       return $key . '="' . $attributes[$key] . '"';
