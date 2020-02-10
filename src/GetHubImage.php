@@ -7,8 +7,8 @@ class getHubImage
   protected $extension;
 
   protected $defaults = [
-    // display size
-    'size' => 'thumbnail',
+    // image to place in src attribute
+    'defaultSize' => 'thumbnail',
 
     // media conditions and the image size required by each condition (image sizes attribute)
     'mediaConditions' => [],
@@ -21,14 +21,13 @@ class getHubImage
   ];
 
   protected $responsiveWidths = [
-    '(min-width: 1680px)', // above 1680px
-    '(min-width: 1366px)', // 1366-1680px
-    '(min-width: 1280px)', // 1280-1366px
-    '(min-width: 1024px)', // 1024-1280px
-    '(min-width: 800px)',  // 800-1024px
-    '(min-width: 412px)',  // 412-800px
-    '(min-width: 375px)',  // 375-414px
-    ''                     // below 375px
+    'min-width: 1680px', // above 1680px
+    'min-width: 1366px', // 1366-1680px
+    'min-width: 1280px', // 1280-1366px
+    'min-width: 1024px', // 1024-1280px
+    'min-width: 800px',  // 800-1024px
+    'min-width: 640px',  // 640-800px
+    ''                   // below 640px
   ];
 
   public function __construct($responsiveWidths = [])
@@ -87,8 +86,8 @@ class getHubImage
   protected function getImgTag($image, $options)
   {
     $attributes = [
-      'src' => $image['sizes'][$options['size']],
-      'alt' => $image['alt_text'],
+      'src' => $image['sizes'][$options['defaultSize']],
+      'alt' => $image['alt_text'] ?? '',
       'class' => 'column'
     ];
 
