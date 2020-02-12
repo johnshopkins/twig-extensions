@@ -21,13 +21,15 @@ class getHubImage
   ];
 
   protected $responsiveWidths = [
-    'min-width: 1680px', // above 1680px
-    'min-width: 1366px', // 1366-1680px
-    'min-width: 1280px', // 1280-1366px
-    'min-width: 1024px', // 1024-1280px
-    'min-width: 800px',  // 800-1024px
-    'min-width: 640px',  // 640-800px
-    ''                   // below 640px
+    'min-width: 1680px',  // desktop
+    'min-width: 1280px',  // desktop
+    'min-width: 1024px',  // table landscape
+    'min-width: 863px',   // drastic breakpoint
+    'min-width: 768px',   // table portrait
+    'min-width: 640px',   // mobile landscape
+    'min-width: 412px',   // large module portrait
+    'min-width: 375px',   // regular modern iPhone portrait
+    ''                    // below 375px
   ];
 
   public function __construct($responsiveWidths = [])
