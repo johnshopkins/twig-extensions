@@ -10,6 +10,8 @@ abstract class BaseExtension
 
   protected $defaults = [];
 
+  protected $classes = [];
+
   public function __construct()
   {
     $this->extension = new \Twig_SimpleFunction($this->extensionName, [$this, 'ext']);
@@ -18,5 +20,19 @@ abstract class BaseExtension
   public function get()
   {
     return $this->extension;
+  }
+
+  protected function compileOptions($image, $options)
+  {
+    $options = array_merge($this->defaults, $options);
+    
+    $options['classes'] = $this->compileClasses($image, $options['classes']);
+
+    return $options;
+  }
+
+  protected function compileClasses($image, $classes)
+  {
+    return array_merge($this->classes, $classes);
   }
 }

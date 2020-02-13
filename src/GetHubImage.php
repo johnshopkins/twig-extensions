@@ -6,6 +6,8 @@ class getHubImage extends BaseExtension
 {
   protected $extensionName = 'getHubImage';
 
+  protected $classes = ['image', 'column', 'force'];
+
   protected $defaults = [
     // image to place in src attribute
     'defaultSize' => 'thumbnail',
@@ -44,7 +46,7 @@ class getHubImage extends BaseExtension
       return '';
     }
     
-    $options = $this->setOptions($image, $options);
+    $options = $this->compileOptions($image, $options);
 
     $html = '<div class="' . implode(' ', $options['classes']) . '">';
 
@@ -56,18 +58,9 @@ class getHubImage extends BaseExtension
     return $html;
   }
 
-  protected function setOptions($image, $options)
-  {
-    $options = array_merge($this->defaults, $options);
-    $options['classes'] = $this->compileClasses($image, $options['classes']);
-
-    return $options;
-  }
-
   protected function compileClasses($image, $classes)
   {
-    // add default classes
-    $classes = array_merge(['image', 'column', 'force'], $classes);
+    $classes = parent::compileClasses($image, $classes);
 
     // add orientation class
     if (!empty($image['orientation'])) {
