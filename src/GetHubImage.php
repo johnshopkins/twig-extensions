@@ -10,9 +10,6 @@ class getHubImage extends BaseExtension
     // image to place in src attribute
     'defaultSize' => 'thumbnail',
 
-    // media conditions and the image size required by each condition (image sizes attribute)
-    'mediaConditions' => [],
-
     // additional classes to add to the div
     'classes' => [],
 
