@@ -2,9 +2,9 @@
 
 namespace TwigExtensions;
 
-class getHubImage
+class getHubImage extends BaseExtension
 {
-  protected $extension;
+  protected $extensionName = 'getHubImage';
 
   protected $defaults = [
     // image to place in src attribute
@@ -34,19 +34,14 @@ class getHubImage
 
   public function __construct($responsiveWidths = [])
   {
+    parent::__construct();
+
     if (!empty($responsiveWidths)) {
       $this->responsiveWidths = $responsiveWidths;
     }
-
-    $this->extension = new \Twig_SimpleFunction('getHubImage', [$this, 'getHubImage']);
   }
 
-  public function get()
-  {
-    return $this->extension;
-  }
-
-  public function getHubImage($image, $options = [])
+  public function ext($image, $options = [])
   {
     if (empty($image)) {
       return '';

@@ -2,9 +2,9 @@
 
 namespace TwigExtensions;
 
-class GetImage
+class GetImage extends BaseExtension
 {
-  protected $extension;
+  protected $extensionName = 'getImage';
 
   protected $defaults = [
     'size' => 'thumbnail',
@@ -25,19 +25,14 @@ class GetImage
 
   public function __construct($responsiveWidths = [])
   {
+    parent::__construct();
+
     if (!empty($responsiveWidths)) {
       $this->responsiveWidths = $responsiveWidths;
     }
-    
-    $this->extension = new \Twig_SimpleFunction('getImage', [$this, 'getImage']);
   }
 
-  public function get()
-  {
-    return $this->extension;
-  }
-
-  public function getImage($image, $options = [])
+  public function ext($image, $options = [])
   {
     if (empty($image)) {
       return '';

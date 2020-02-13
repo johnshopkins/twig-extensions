@@ -2,21 +2,11 @@
 
 namespace TwigExtensions;
 
-class GetImageSrc
+class GetImageSrc extends BaseExtension
 {
-  protected $extension;
+  protected $extensionName = 'getImageSrc';
 
-  public function __construct()
-  {
-    $this->extension = new \Twig_SimpleFunction('getImageSrc', [$this, 'getImageSrc']);
-  }
-
-  public function get()
-  {
-    return $this->extension;
-  }
-
-  public function getImageSrc($image, $crop = 'thumbnail')
+  public function ext($image, $crop = 'thumbnail')
   {
     $id = null;
 
