@@ -20,7 +20,7 @@ class getHubImage extends BaseExtension
     'showCaption' => true
   ];
 
-  protected $responsiveWidths = [
+  protected $imageBreakpoints = [
     'min-width: 1680px',  // desktop
     'min-width: 1280px',  // desktop
     'min-width: 1024px',  // table landscape
@@ -32,12 +32,12 @@ class getHubImage extends BaseExtension
     ''                    // below 375px
   ];
 
-  public function __construct($responsiveWidths = [])
+  public function __construct($imageBreakpoints = [])
   {
     parent::__construct();
 
-    if (!empty($responsiveWidths)) {
-      $this->responsiveWidths = $responsiveWidths;
+    if (!empty($imageBreakpoints)) {
+      $this->imageBreakpoints = $imageBreakpoints;
     }
   }
 
@@ -91,8 +91,8 @@ class getHubImage extends BaseExtension
     if (!empty($options['responsiveSizes'])) {
       $attributes['sizes'] = [];
 
-      for ($i = 0; $i < count($this->responsiveWidths); $i++) {
-        $width = $this->responsiveWidths[$i];
+      for ($i = 0; $i < count($this->imageBreakpoints); $i++) {
+        $width = $this->imageBreakpoints[$i];
         $size = $options['responsiveSizes'][$i];
         $attributes['sizes'][] = !empty($width) ? "({$width}) {$size}px": "{$size}px";
       }
