@@ -45,14 +45,15 @@ class Lazyload extends BaseExtension
 
     $type = $collectionData['type'] ?? $collection['meta']['type'];
 
-    if ($type === 'default') {
-      $type = 'recent';
+    if (in_array($type, ['featured', 'popular', 'recent', 'random'])) {
+      // transistioning away from using featured, popular, recent, random collection types
+      $type = 'default';
     }
 
     $attributes = [
       'class' => implode(' ', $options['classes']),
       'data-per_page' => $collectionData['count'] ?? 5,
-      'data-type' => $type
+      'data-type' => $type // default, explicit, related
     ];
 
     if ($type === 'explicit') {
@@ -60,6 +61,7 @@ class Lazyload extends BaseExtension
       $order = array_slice($collection['meta']['order'], 0, $attributes['data-per_page']);
       $attributes['data-endpoints'] = $this->compileEndpoints($collection['meta']['endpoints'], $order);
       $attributes['data-order'] = implode(',', $order);
+      $attributes['data-order_by'] = 'list';
       $attributes['data-source'] = 'all';
     } else {
       $attributes['data-endpoint'] = $collection['meta']['endpoint'];
