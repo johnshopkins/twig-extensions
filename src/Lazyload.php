@@ -11,6 +11,7 @@ class Lazyload extends BaseExtension
   protected $defaults = [
     'additionalData' => [], // additional data to send to JS
     'classes' => [],        // additional classes to add to the container tag
+    'imageSizes' => [],     // used in JavaScript for responsive image sizes
     'post' => null,         // if the lazyload is on a post (prevents this post from showing up in lazyload content)
     'tag' => 'div',         // container tag
     'title' => '',          // title of the lazyload container
@@ -20,13 +21,13 @@ class Lazyload extends BaseExtension
   public function ext($data, $options = [])
   {
     if (isset($data['id'])) {
-      return $this->singleItem($data);
+      return $this->singleItem($data, $options);
     } else {
       return $this->collection($data, $options);
     }
   }
 
-  protected function singleItem($itemData)
+  protected function singleItem($itemData, $options)
   {
     $attributes = $this->compileAttributes([
       'data-endpoint' => $itemData['collection'],
@@ -35,7 +36,15 @@ class Lazyload extends BaseExtension
       'data-type' => 'recent'
     ]);
 
-    return "<div class=\"bbload content-item\" {$attributes}></div>";
+    $outputData = [
+      'imageSizes' => $options['imageSizes']
+    ];
+
+    $output = "<div class=\"bbload content-item\" {$attributes}>";
+    $output .= '<script type="application/json">' . json_encode($outputData) . '</script>';
+    $output .= "</div>";
+
+    return $output;
   }
 
   protected function collection($collectionData, $options)
@@ -88,15 +97,18 @@ class Lazyload extends BaseExtension
     $attributes = $this->compileAttributes($attributes);
     $output = "<{$options['tag']} {$attributes}>";
 
+    $outputData = [
+      'imageSizes' => $options['imageSizes']
+    ];
+
     // add data needed for related collection
     if ($type === 'related' and !empty($options['post'])) {
-      $relatedData = [
-        'tags' => $options['post']['_embedded']['tags'],
-        'topics' => $options['post']['_embedded']['topics'],
-        'related_content' => $options['post']['_links']['related_content'] ?? null
-      ];
-      $output .= '<script type="application/json">' . json_encode($relatedData) . '</script>';
+      $outputData['tags'] = $options['post']['_embedded']['tags'];
+      $outputData['topics'] = $options['post']['_embedded']['topics'];
+      $outputData['related_content'] = $options['post']['_links']['related_content'] ?? null;
     }
+
+    $output .= '<script type="application/json">' . json_encode($outputData) . '</script>';
 
     if (!empty($options['title'])) {
       $output .= "<{$options['titleTag']}>{$options['title']}</{$options['titleTag']}>";
