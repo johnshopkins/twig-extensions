@@ -131,6 +131,6 @@ class getHubImage extends BaseExtension
       return '';
     }
 
-    return '<p><span class="visuallyhidden">Credit: </span>' . $image['credit'] . '</p>';
+    return '<p class="credit"><span class="visuallyhidden">Credit: </span>' . $image['credit'] . '</p>';
   }
 }
