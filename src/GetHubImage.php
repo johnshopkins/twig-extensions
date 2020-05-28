@@ -76,10 +76,13 @@ class getHubImage
     $attributes = [
       'src' => $image['sizes'][$options['size']],
       'alt' => $image['alt_text'],
-      'class' => 'column',
-      'srcset' => $image['srcsets'][$srcset],
-      'sizes' => implode(', ', $options['mediaConditions'])
+      'class' => 'column'
     ];
+
+    if (!empty($options['mediaConditions'])) {
+      $attributes['srcset'] = $image['srcsets'][$srcset];
+      $attributes['sizes'] = implode(', ', $options['mediaConditions']);
+    }
 
     $attributes = array_map(function ($key) use ($attributes) {
       return $key . '="' . $attributes[$key] . '"';
