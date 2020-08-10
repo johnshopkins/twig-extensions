@@ -84,6 +84,9 @@ class getHubImage extends BaseExtension
       for ($i = 0; $i < count($this->imageBreakpoints); $i++) {
         $width = $this->imageBreakpoints[$i];
         $size = $options['responsiveSizes'][$i];
+        if (!$size) {
+          continue;
+        }
         $attributes['sizes'][] = !empty($width) ? "({$width}) {$size}px": "{$size}px";
       }
 

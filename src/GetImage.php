@@ -50,6 +50,9 @@ class GetImage extends BaseExtension
       for ($i = 0; $i < count($this->imageBreakpoints); $i++) {
         $width = $this->imageBreakpoints[$i];
         $size = $options['responsiveSizes'][$i];
+        // if (!$size) {
+        //   continue;
+        // }
         $options['attr']['sizes'][] = !empty($width) ? "({$width}) {$size}px": "{$size}px";
       }
       $options['attr']['sizes'] = implode(', ', $options['attr']['sizes']);
