@@ -14,7 +14,7 @@ abstract class BaseExtension
 
   public function __construct()
   {
-    $this->extension = new \Twig_SimpleFunction($this->extensionName, [$this, 'ext']);
+    $this->extension = new \Twig\TwigFunction($this->extensionName, [$this, 'ext']);
   }
 
   public function get()
