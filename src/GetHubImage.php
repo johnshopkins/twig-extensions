@@ -100,7 +100,7 @@ class getHubImage extends BaseExtension
       return $key . '="' . $attributes[$key] . '"';
     }, array_keys($attributes));
 
-    return '<img ' . implode(' ', $attributes) . '/>';
+    return '<div class="image-container"><img ' . implode(' ', $attributes) . '/></div>';
   }
 
   protected function getCaptionAndCredit($image, $options)
