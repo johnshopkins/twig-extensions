@@ -96,12 +96,12 @@ class getHubImage extends BaseExtension
       $attributes['srcset'] = $image['srcsets'][$srcset];
     }
 
-    $attributes = array_map(function ($key) use ($attributes) {
+    $compiled = array_map(function ($key) use ($attributes) {
       return $key . '="' . $attributes[$key] . '"';
     }, array_keys($attributes));
 
     if (!isset($options['placeholder'])) {
-      return '<div class="image-container"><img ' . implode(' ', $attributes) . '/></div>';
+      return '<div class="image-container"><img ' . implode(' ', $compiled) . '/></div>';
     } else {
       $ratio = ($image['height'] / $image['width']) * 100;
       return '<div class="image-container"><script type="application/json">' . json_encode($attributes) . '</script><div class="placeholder" style="padding-bottom:' . $ratio . '%;"></div></div>';
