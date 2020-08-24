@@ -43,9 +43,9 @@ class GetImage extends BaseExtension
 
     $id = is_object($image) ? $image->ID : $image['ID'];
 
-    // default wordpress srcset
-    // ensures that even thumbnails have them (by default, they don't)
-    $options['attr']['srcset'] = wp_get_attachment_image_srcset($id);
+    // // default wordpress srcset
+    // // ensures that even thumbnails have them (by default, they don't)
+    // $options['attr']['srcset'] = wp_get_attachment_image_srcset($id);
 
     if (!empty($options['responsiveSizes'])) {
 
@@ -62,9 +62,9 @@ class GetImage extends BaseExtension
       $options['attr']['sizes'] = implode(', ', $options['attr']['sizes']);
 
     } else {
-      // default wordpress sizes
-    // ensures that even thumbnails have them (by default, they don't)
-      $options['attr']['sizes'] = wp_get_attachment_image_sizes($id);
+      // // default wordpress sizes
+      // // ensures that even thumbnails have them (by default, they don't)
+      // $options['attr']['sizes'] = wp_get_attachment_image_sizes($id);
     }
 
     return wp_get_attachment_image($id, $options['size'], false, $options['attr']);
