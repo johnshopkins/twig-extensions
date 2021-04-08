@@ -26,7 +26,7 @@ class Lazyload extends BaseExtension
     } else if (isset($data['id'])) {
       // single item set by hub api content picker
       return $this->singleItem($data, $options);
-    } else if (isset($data['endpoint']) || isset($data['endpoints'])) {
+    } else if (isset($data['endpoint'])) {
       // parameters set in twig templates
       return $this->manualCollection($data, $options);
     }
@@ -95,7 +95,7 @@ class Lazyload extends BaseExtension
   {
     $type = $collectionData['type'] ?? 'default'; // default, explicit, related
 
-    if (isset($collectionData['type']) && $collectionData['type'] === 'related' && empty($options['post']['_embedded']['topics']) && empty($options['post']['_embedded']['tags'])) {
+    if (isset($collectionData['type']) && $collectionData['type'] === 'related' && !empty($options['post']['_embedded']['topics']) && !empty($options['post']['_embedded']['tags'])) {
       $type = 'related';
     } else {
       $type = 'default';
@@ -123,8 +123,8 @@ class Lazyload extends BaseExtension
     }
 
     // passed in query data
-    if (!empty($collection['params'])) {
-      foreach ($collection['params'] as $key => $value) {
+    if (!empty($collectionData['params'])) {
+      foreach ($collectionData['params'] as $key => $value) {
         $key = 'data-' . $key;
         $attributes[$key] = $value;
       }
