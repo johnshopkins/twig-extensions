@@ -6,7 +6,7 @@ class Lazyload extends BaseExtension
 {
   protected $extensionName = 'lazyload';
 
-  protected $classes = ['bbload', 'content-collection', 'force'];
+  protected $classes = ['bbload', 'force'];
 
   protected $defaults = [
     'additionalData' => [], // additional data to send to JS
@@ -32,43 +32,86 @@ class Lazyload extends BaseExtension
     }
   }
 
-  protected function singleItem($item, $options)
+  protected function collectionPost($collection, $options)
   {
-    $attributes = $this->compileAttributes([
-      'data-endpoint' => $item['collection'],
-      'data-ids' => $item['id'],
-      'data-source' => 'all',
-      'data-type' => 'recent'
-    ]);
+    // normalize collection object data for $this->collection
+    $options['classes'][] = 'content-collection';
 
-    $outputData = [
-      'imageSizes' => $options['imageSizes']
+    $data = [
+      'type' => $collection['meta']['type'],
+      'params' => ['per_page' => $collection['count'] ?? 5]
     ];
 
-    $output = "<div class=\"bbload content-item\" {$attributes}>";
-    $output .= '<script type="application/json">' . json_encode($outputData) . '</script>';
-    $output .= "</div>";
+    if ($data['type'] === 'explicit') {
+      // limit number of items to specified count
+      $order = array_slice($collection['meta']['order'], 0, $data['params']['per_page']);
+      $data['endpoints'] = $this->compileEndpoints($collection['meta']['endpoints'], $order);
+      $data['params']['order'] = implode(',', $order);
+      $data['params']['order_by'] = 'list';
+      $data['params']['source'] = 'all';
+    } else {
+      $data['endpoint'] = $collection['meta']['endpoint'];
+    }
 
-    return $output;
+    // query parameter key/values on the collection
+    if (!empty($collection['meta']['query'])) {
+      foreach ($collection['meta']['query'] as $query) {
+        $data['params'][$query['key']] = $query['value'];
+      }
+    }
+
+    return $this->printLazyload($data, $options);
   }
 
-  protected function collection($collectionData, $options)
+  protected function singleItem($item, $options)
+  {
+    $data = [
+      'endpoints' => $item['collection'] . '=' . $item['id'],
+      'params' => [
+        'source' => 'all',
+        'per_page' => 1
+      ]
+    ];
+
+    $options['classes'][] = 'content-item';
+
+    return $this->printLazyload($data, $options);
+  }
+
+  protected function manualCollection($collectionData, $options)
+  {
+    // normalize manual collection data for $this->collection
+    $options['classes'][] = 'content-collection';
+    return $this->printLazyload($collectionData, $options);
+  }
+
+  /**
+   * Collection data: endpoint, endpoints, params, type
+   * @param [type] $collectionData
+   * @param [type] $options
+   * @return void
+   */
+  protected function printLazyload($collectionData, $options)
   {
     $type = $collectionData['type'] ?? 'default'; // default, explicit, related
+
+    if (isset($collectionData['type']) && $collectionData['type'] === 'related' && empty($options['post']['_embedded']['topics']) && empty($options['post']['_embedded']['tags'])) {
+      $type = 'related';
+    } else {
+      $type = 'default';
+    }
+
     $options = $this->compileOptions($collectionData, $options);
 
     $attributes = [
       'class' => implode(' ', $options['classes']),
-      'data-per_page' => $collectionData['count'] ?? 5,
+      'data-per_page' => $collectionData['params']['per_page'] ?? 5,
       'data-type' => $type
     ];
 
     if (isset($collectionData['endpoints'])) {
       $attributes['data-endpoints'] = $collectionData['endpoints'];
-      $attributes['data-order'] = $collectionData['order'];
-      $attributes['data-order_by'] = 'list';
-      $attributes['data-source'] = 'all';
-    } else {
+    } else if (isset($collectionData['endpoint'])) {
       $attributes['data-endpoint'] = $collectionData['endpoint'];
     }
 
@@ -79,11 +122,11 @@ class Lazyload extends BaseExtension
       $attributes['data-excluded_ids'] = $hasInstances ? substr($id, 0, $hasInstances) : $id; // substr for events (their ID includes event instance ID)
     }
 
-    // query parameter key/values on the collection
-    if (!empty($collection['meta']['query'])) {
-      foreach ($collection['meta']['query'] as $query) {
-        $key = 'data-' . $query['key'];
-        $attributes[$key] = $query['value'];
+    // passed in query data
+    if (!empty($collection['params'])) {
+      foreach ($collection['params'] as $key => $value) {
+        $key = 'data-' . $key;
+        $attributes[$key] = $value;
       }
     }
   
@@ -113,33 +156,6 @@ class Lazyload extends BaseExtension
     $output .= "</{$options['tag']}>";
 
     return $output;
-  }
-
-  protected function manualCollection($collectionData, $options)
-  {
-    // normalize manual collection data for $this->collection
-    return $this->collection($collectionData, $options);
-  }
-
-  protected function collectionPost($collection, $options)
-  {
-    // normalize collection object data for $this->collection
-
-    $data = [
-      'type' => $collection['meta']['type'],
-      'count' => $collection['count'] ?? 5
-    ];
-
-    if ($data['type'] === 'explicit') {
-      // limit number of items
-      $order = array_slice($collection['meta']['order'], 0, $data['count']);
-      $data['endpoints'] = $this->compileEndpoints($collection['meta']['endpoints'], $order);
-      $data['order'] = implode(',', $order);
-    } else {
-      $data['endpoint'] = $collection['meta']['endpoint'];
-    }
-
-    return $this->collection($data, $options);
   }
 
   /**
