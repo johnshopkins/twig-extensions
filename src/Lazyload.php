@@ -20,18 +20,23 @@ class Lazyload extends BaseExtension
 
   public function ext($data, $options = [])
   {
-    if (isset($data['id'])) {
+    if (isset($data['post_type']) && $data['post_type'] === 'collection') {
+      // collection post
+      return $this->collectionPost($data, $options);
+    } else if (isset($data['id'])) {
+      // single item set by hub api content picker
       return $this->singleItem($data, $options);
-    } else {
-      return $this->collection($data, $options);
+    } else if (isset($data['endpoint']) || isset($data['endpoints'])) {
+      // parameters set in twig templates
+      return $this->manualCollection($data, $options);
     }
   }
 
-  protected function singleItem($itemData, $options)
+  protected function singleItem($item, $options)
   {
     $attributes = $this->compileAttributes([
-      'data-endpoint' => $itemData['collection'],
-      'data-ids' => $itemData['id'],
+      'data-endpoint' => $item['collection'],
+      'data-ids' => $item['id'],
       'data-source' => 'all',
       'data-type' => 'recent'
     ]);
@@ -49,31 +54,22 @@ class Lazyload extends BaseExtension
 
   protected function collection($collectionData, $options)
   {
-    $collection = $collectionData['collection'];
+    $type = $collectionData['type'] ?? 'default'; // default, explicit, related
     $options = $this->compileOptions($collectionData, $options);
-
-    $type = $collectionData['type'] ?? $collection['meta']['type'];
-
-    if (in_array($type, ['featured', 'popular', 'recent', 'random'])) {
-      // transistioning away from using featured, popular, recent, random collection types
-      $type = 'default';
-    }
 
     $attributes = [
       'class' => implode(' ', $options['classes']),
       'data-per_page' => $collectionData['count'] ?? 5,
-      'data-type' => $type // default, explicit, related
+      'data-type' => $type
     ];
 
-    if ($type === 'explicit') {
-      // limit number of items to per_page
-      $order = array_slice($collection['meta']['order'], 0, $attributes['data-per_page']);
-      $attributes['data-endpoints'] = $this->compileEndpoints($collection['meta']['endpoints'], $order);
-      $attributes['data-order'] = implode(',', $order);
+    if (isset($collectionData['endpoints'])) {
+      $attributes['data-endpoints'] = $collectionData['endpoints'];
+      $attributes['data-order'] = $collectionData['order'];
       $attributes['data-order_by'] = 'list';
       $attributes['data-source'] = 'all';
     } else {
-      $attributes['data-endpoint'] = $collection['meta']['endpoint'];
+      $attributes['data-endpoint'] = $collectionData['endpoint'];
     }
 
     // exclude ID of current post
@@ -119,15 +115,43 @@ class Lazyload extends BaseExtension
     return $output;
   }
 
+  protected function manualCollection($collectionData, $options)
+  {
+    // normalize manual collection data for $this->collection
+    return $this->collection($collectionData, $options);
+  }
+
+  protected function collectionPost($collection, $options)
+  {
+    // normalize collection object data for $this->collection
+
+    $data = [
+      'type' => $collection['meta']['type'],
+      'count' => $collection['count'] ?? 5
+    ];
+
+    if ($data['type'] === 'explicit') {
+      // limit number of items
+      $order = array_slice($collection['meta']['order'], 0, $data['count']);
+      $data['endpoints'] = $this->compileEndpoints($collection['meta']['endpoints'], $order);
+      $data['order'] = implode(',', $order);
+    } else {
+      $data['endpoint'] = $collection['meta']['endpoint'];
+    }
+
+    return $this->collection($data, $options);
+  }
+
+  /**
+   * Combine array of attributes into a string that can be placed
+   * into a div.
+   * @param array $attributes Ex: ["data-{attribute}" => "value"]
+   * @return void
+   */
   protected function compileAttributes($attributes)
   {
     return implode(' ', array_map(function ($key) use ($attributes) {
       $value = $attributes[$key];
-      if (is_array($value)) {
-        echo '<pre>'; print_r([
-          $key, $value
-        ]); echo '</pre>'; die();
-      }
       return "{$key}=\"{$value}\"";
     }, array_keys($attributes)));
   }
