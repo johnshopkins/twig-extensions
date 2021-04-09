@@ -26,9 +26,12 @@ class Lazyload extends BaseExtension
     } else if (isset($data['id'])) {
       // single item set by hub api content picker
       return $this->singleItem($data, $options);
+    } else if (isset($data['endpoints'])) {
+      // manual collection set by hub api conntet picker (not collection object)
+      return $this->manualCollection($data, $options);
     } else if (isset($data['endpoint'])) {
       // parameters set in twig templates
-      return $this->manualCollection($data, $options);
+      return $this->hardcodedCollection($data, $options);
     }
   }
 
@@ -43,12 +46,7 @@ class Lazyload extends BaseExtension
     ];
 
     if ($data['type'] === 'explicit') {
-      // limit number of items to specified count
-      $order = array_slice($collection['meta']['order'], 0, $data['params']['per_page']);
-      $data['endpoints'] = $this->compileEndpoints($collection['meta']['endpoints'], $order);
-      $data['params']['order'] = implode(',', $order);
-      $data['params']['order_by'] = 'list';
-      $data['params']['source'] = 'all';
+      $data = $this->compileParamsForEndpoints($collection, $data);
     } else {
       $data['endpoint'] = $collection['meta']['endpoint'];
     }
@@ -78,7 +76,21 @@ class Lazyload extends BaseExtension
     return $this->printLazyload($data, $options);
   }
 
-  protected function manualCollection($collectionData, $options)
+  protected function manualCollection($collection, $options)
+  {
+    // normalize collection object data for $this->collection
+    $options['classes'][] = 'content-collection';
+
+    $data = [
+      'params' => ['per_page' => count($collection['order'])]
+    ];
+
+    $data = $this->compileParamsForEndpoints($collection, $data);
+
+    return $this->printLazyload($data, $options);
+  }
+
+  protected function hardcodedCollection($collectionData, $options)
   {
     // normalize manual collection data for $this->collection
     $options['classes'][] = 'content-collection';
@@ -156,6 +168,17 @@ class Lazyload extends BaseExtension
     $output .= "</{$options['tag']}>";
 
     return $output;
+  }
+
+  protected function compileParamsForEndpoints($collection, $data)
+  {
+    $order = array_slice($collection['order'], 0, $data['params']['per_page']);
+    $data['endpoints'] = $this->compileEndpoints($collection['endpoints'], $order);
+    $data['params']['order'] = implode(',', $order);
+    $data['params']['order_by'] = 'list';
+    $data['params']['source'] = 'all';
+
+    return $data;
   }
 
   /**
