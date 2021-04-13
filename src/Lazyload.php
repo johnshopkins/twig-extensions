@@ -20,45 +20,14 @@ class Lazyload extends BaseExtension
 
   public function ext($data, $options = [])
   {
-    if (isset($data['post_type']) && $data['post_type'] === 'collection') {
-      // collection post
-      return $this->collectionPost($data, $options);
-    } else if (isset($data['id'])) {
+    if (isset($data['id'])) {
       // single item set by hub api content picker
       return $this->singleItem($data, $options);
     } else if (isset($data['endpoints'])) {
-      // manual collection set by hub api conntet picker (not collection object)
-      return $this->manualCollection($data, $options);
+      return $this->endpointsCollection($data, $options);
     } else if (isset($data['endpoint'])) {
-      // parameters set in twig templates
-      return $this->hardcodedCollection($data, $options);
+      return $this->endpointCollection($data, $options);
     }
-  }
-
-  protected function collectionPost($collection, $options)
-  {
-    // normalize collection object data for $this->collection
-    $options['classes'][] = 'content-collection';
-
-    $data = [
-      'type' => $collection['meta']['type'],
-      'params' => ['per_page' => $collection['count'] ?? 5]
-    ];
-
-    if ($data['type'] === 'explicit') {
-      $data = $this->compileParamsForEndpoints($collection, $data);
-    } else {
-      $data['endpoint'] = $collection['meta']['endpoint'];
-    }
-
-    // query parameter key/values on the collection
-    if (!empty($collection['meta']['query'])) {
-      foreach ($collection['meta']['query'] as $query) {
-        $data['params'][$query['key']] = $query['value'];
-      }
-    }
-
-    return $this->printLazyload($data, $options);
   }
 
   protected function singleItem($item, $options)
@@ -76,7 +45,14 @@ class Lazyload extends BaseExtension
     return $this->printLazyload($data, $options);
   }
 
-  protected function manualCollection($collection, $options)
+  protected function endpointCollection($collectionData, $options)
+  {
+    // normalize manual collection data for $this->collection
+    $options['classes'][] = 'content-collection';
+    return $this->printLazyload($collectionData, $options);
+  }
+
+  protected function endpointsCollection($collection, $options)
   {
     // normalize collection object data for $this->collection
     $options['classes'][] = 'content-collection';
@@ -88,13 +64,6 @@ class Lazyload extends BaseExtension
     $data = $this->compileParamsForEndpoints($collection, $data);
 
     return $this->printLazyload($data, $options);
-  }
-
-  protected function hardcodedCollection($collectionData, $options)
-  {
-    // normalize manual collection data for $this->collection
-    $options['classes'][] = 'content-collection';
-    return $this->printLazyload($collectionData, $options);
   }
 
   /**
