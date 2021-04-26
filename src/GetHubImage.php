@@ -114,6 +114,8 @@ class getHubImage extends BaseExtension
       return '';
     }
 
+    $classes = ['caption', 'credit'];
+
     $caption = $this->getCaption($image);
     $credit = $this->getCredit($image);
 
@@ -121,7 +123,15 @@ class getHubImage extends BaseExtension
       return '';
     }
 
-    return '<div class="caption column">' . $caption . $credit . '</div>';
+    if ($caption) {
+      $classes[] = 'has-caption';
+    }
+
+    if ($credit) {
+      $classes[] = 'has-credit';
+    }
+
+    return '<div class="' . implode(' ', $classes) . '">' . $caption . $credit . '</div>';
   }
 
   protected function getCaption($image)
