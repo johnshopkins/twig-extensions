@@ -16,7 +16,10 @@ class getHubImage extends BaseExtension
     'classes' => [],
 
     // show caption TRUE/FALSE
-    'showCaption' => true
+    'showCaption' => true,
+
+    // allow paragraphs in captions TRUE/FALSE
+    'allowCaptionParagraphs' => false
   ];
 
   protected $imageBreakpoints = [
@@ -116,7 +119,7 @@ class getHubImage extends BaseExtension
 
     $classes = ['caption', 'column'];
 
-    $caption = $this->getCaption($image);
+    $caption = $this->getCaption($image, $options);
     $credit = $this->getCredit($image);
 
     if (!$caption && !$credit) {
@@ -134,13 +137,17 @@ class getHubImage extends BaseExtension
     return '<div class="' . implode(' ', $classes) . '">' . $caption . $credit . '</div>';
   }
 
-  protected function getCaption($image)
+  protected function getCaption($image, $options)
   {
     if (empty($image['caption'])) {
       return '';
     }
 
-    return '<p><span class="visuallyhidden">Image caption: </span>' . strip_tags($image['caption'], '<i><b><strong><em><a>') . '</p>';
+    if (!$options['allowCaptionParagraphs']) {
+      return '<p><span class="visuallyhidden">Image caption: </span>' . strip_tags($image['caption'], '<i><b><strong><em><a>') . '</p>';
+    } else {
+      return '<span class="visuallyhidden">Image caption: </span>' . strip_tags($image['caption'], '<i><b><strong><em><a><p>');
+    }
   }
 
   protected function getCredit($image)
