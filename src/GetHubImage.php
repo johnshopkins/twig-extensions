@@ -22,21 +22,11 @@ class getHubImage extends BaseExtension
     'allowCaptionParagraphs' => false
   ];
 
-  protected $imageBreakpoints = [
-    'min-width: 1680px',  // desktop
-    'min-width: 1280px',  // desktop
-    'min-width: 1024px',  // table landscape
-    'min-width: 863px',   // drastic breakpoint
-    'min-width: 768px',   // table portrait
-    'min-width: 640px',   // mobile landscape
-    'min-width: 412px',   // large module portrait
-    'min-width: 375px',   // regular modern iPhone portrait
-    ''                    // below 375px
-  ];
-
-  public function __construct($imageBreakpoints = [])
+  public function __construct($responsiveImageHelper, $imageBreakpoints = [])
   {
     parent::__construct();
+
+    $this->responsiveImageHelper = $responsiveImageHelper;
 
     if (!empty($imageBreakpoints)) {
       $this->imageBreakpoints = $imageBreakpoints;
@@ -82,19 +72,7 @@ class getHubImage extends BaseExtension
     ];
 
     if (!empty($options['responsiveSizes'])) {
-      $attributes['sizes'] = [];
-
-      for ($i = 0; $i < count($this->imageBreakpoints); $i++) {
-        $width = $this->imageBreakpoints[$i];
-        $size = $options['responsiveSizes'][$i];
-        if (!$size) {
-          continue;
-        }
-        $attributes['sizes'][] = !empty($width) ? "({$width}) {$size}px": "{$size}px";
-      }
-
-      $attributes['sizes'] = implode(', ', $attributes['sizes']);
-
+      $attributes['sizes'] = $this->responsiveImageHelper($options['responsiveSizes']);
       $srcset = $options['srcset'] ?? 'scaled';
       $attributes['srcset'] = $image['srcsets'][$srcset];
     }

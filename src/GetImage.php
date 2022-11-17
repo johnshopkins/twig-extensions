@@ -12,21 +12,11 @@ class GetImage extends BaseExtension
     'attr' => []
   ];
 
-  protected $imageBreakpoints = [
-    'min-width: 1680px',  // desktop
-    'min-width: 1280px',  // desktop
-    'min-width: 1024px',  // table landscape
-    'min-width: 863px',   // drastic breakpoint
-    'min-width: 768px',   // table portrait
-    'min-width: 640px',   // mobile landscape
-    'min-width: 412px',   // large module portrait
-    'min-width: 375px',   // regular modern iPhone portrait
-    ''                    // below 375px
-  ];
-
-  public function __construct($imageBreakpoints = [])
+  public function __construct($responsiveImageHelper, $imageBreakpoints = [])
   {
     parent::__construct();
+
+    $this->responsiveImageHelper = $responsiveImageHelper;
 
     if (!empty($imageBreakpoints)) {
       $this->imageBreakpoints = $imageBreakpoints;
@@ -49,17 +39,7 @@ class GetImage extends BaseExtension
 
     if (!empty($options['responsiveSizes'])) {
 
-      $options['attr']['sizes'] = [];
-
-      for ($i = 0; $i < count($this->imageBreakpoints); $i++) {
-        $width = $this->imageBreakpoints[$i];
-        $size = $options['responsiveSizes'][$i];
-        // if (!$size) {
-        //   continue;
-        // }
-        $options['attr']['sizes'][] = !empty($width) ? "({$width}) {$size}px": "{$size}px";
-      }
-      $options['attr']['sizes'] = implode(', ', $options['attr']['sizes']);
+      $options['attr']['sizes'] = $this->responsiveImageHelper($options['responsiveSizes']);
 
     } else {
       // // default wordpress sizes
