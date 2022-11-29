@@ -72,7 +72,7 @@ class getHubImage extends BaseExtension
     ];
 
     if (!empty($options['responsiveSizes'])) {
-      $attributes['sizes'] = $this->responsiveImageHelper($options['responsiveSizes']);
+      $attributes['sizes'] = $this->responsiveImageHelper->getImageSizes($options['responsiveSizes']);
       $srcset = $options['srcset'] ?? 'scaled';
       $attributes['srcset'] = $image['srcsets'][$srcset];
     }

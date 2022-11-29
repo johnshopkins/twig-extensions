@@ -39,7 +39,7 @@ class GetImage extends BaseExtension
 
     if (!empty($options['responsiveSizes'])) {
 
-      $options['attr']['sizes'] = $this->responsiveImageHelper($options['responsiveSizes']);
+      $options['attr']['sizes'] = $this->responsiveImageHelper->getImageSizes($options['responsiveSizes']);
 
     } else {
       // // default wordpress sizes
