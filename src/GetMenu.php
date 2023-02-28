@@ -22,6 +22,11 @@ class GetMenu extends BaseExtension
     // use dropdown accessible markup
     'dropdown' => false,
 
+    // force the page with this ID to be the active page
+    // usage: force "university leadership" page to be active when a leadership
+    // profile is being viewed
+    'forceActivePage' => null,
+
     // show toggle
     'toggle' => false,
 
