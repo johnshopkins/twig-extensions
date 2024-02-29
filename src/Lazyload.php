@@ -6,7 +6,7 @@ class Lazyload extends BaseExtension
 {
   protected $extensionName = 'lazyload';
 
-  protected $classes = ['bbload', 'content-collection', 'force'];
+  protected $classes = ['bbload', 'force'];
 
   protected $defaults = [
     'additionalData' => [], // additional data to send to JS
@@ -21,59 +21,79 @@ class Lazyload extends BaseExtension
   public function ext($data, $options = [])
   {
     if (isset($data['id'])) {
+      // single item set by hub api content picker
       return $this->singleItem($data, $options);
-    } else {
-      return $this->collection($data, $options);
+    } else if (isset($data['endpoints'])) {
+      return $this->endpointsCollection($data, $options);
+    } else if (isset($data['endpoint'])) {
+      return $this->endpointCollection($data, $options);
     }
   }
 
-  protected function singleItem($itemData, $options)
+  protected function singleItem($item, $options)
   {
-    $attributes = $this->compileAttributes([
-      'data-endpoint' => $itemData['collection'],
-      'data-ids' => $itemData['id'],
-      'data-source' => 'all',
-      'data-type' => 'recent'
-    ]);
-
-    $outputData = [
-      'imageSizes' => $options['imageSizes']
+    $data = [
+      'endpoints' => $item['collection'] . '=' . $item['id'],
+      'params' => [
+        'source' => 'all',
+        'per_page' => 1
+      ]
     ];
 
-    $output = "<div class=\"bbload content-item\" {$attributes}>";
-    $output .= '<script type="application/json">' . json_encode($outputData) . '</script>';
-    $output .= "</div>";
+    $options['classes'][] = 'content-item';
 
-    return $output;
+    return $this->printLazyload($data, $options);
   }
 
-  protected function collection($collectionData, $options)
+  protected function endpointCollection($collectionData, $options)
   {
-    $collection = $collectionData['collection'];
-    $options = $this->compileOptions($collectionData, $options);
+    // normalize manual collection data for $this->collection
+    $options['classes'][] = 'content-collection';
+    return $this->printLazyload($collectionData, $options);
+  }
 
-    $type = $collectionData['type'] ?? $collection['meta']['type'];
+  protected function endpointsCollection($collection, $options)
+  {
+    // normalize collection object data for $this->collection
+    $options['classes'][] = 'content-collection';
 
-    if (in_array($type, ['featured', 'popular', 'recent', 'random'])) {
-      // transistioning away from using featured, popular, recent, random collection types
+    $data = [
+      'params' => ['per_page' => count($collection['order'])]
+    ];
+
+    $data = $this->compileParamsForEndpoints($collection, $data);
+
+    return $this->printLazyload($data, $options);
+  }
+
+  /**
+   * Collection data: endpoint, endpoints, params, type
+   * @param [type] $collectionData
+   * @param [type] $options
+   * @return void
+   */
+  protected function printLazyload($collectionData, $options)
+  {
+    $type = $collectionData['type'] ?? 'default'; // default, explicit, related
+
+    if (isset($collectionData['type']) && $collectionData['type'] === 'related' && !empty($options['post']['_embedded']['topics']) && !empty($options['post']['_embedded']['tags'])) {
+      $type = 'related';
+    } else {
       $type = 'default';
     }
 
+    $options = $this->compileOptions($collectionData, $options);
+
     $attributes = [
       'class' => implode(' ', $options['classes']),
-      'data-per_page' => $collectionData['count'] ?? 5,
-      'data-type' => $type // default, explicit, related
+      'data-per_page' => $collectionData['params']['per_page'] ?? 5,
+      'data-type' => $type
     ];
 
-    if ($type === 'explicit') {
-      // limit number of items to per_page
-      $order = array_slice($collection['meta']['order'], 0, $attributes['data-per_page']);
-      $attributes['data-endpoints'] = $this->compileEndpoints($collection['meta']['endpoints'], $order);
-      $attributes['data-order'] = implode(',', $order);
-      $attributes['data-order_by'] = 'list';
-      $attributes['data-source'] = 'all';
-    } else {
-      $attributes['data-endpoint'] = $collection['meta']['endpoint'];
+    if (isset($collectionData['endpoints'])) {
+      $attributes['data-endpoints'] = $collectionData['endpoints'];
+    } else if (isset($collectionData['endpoint'])) {
+      $attributes['data-endpoint'] = $collectionData['endpoint'];
     }
 
     // exclude ID of current post
@@ -83,11 +103,11 @@ class Lazyload extends BaseExtension
       $attributes['data-excluded_ids'] = $hasInstances ? substr($id, 0, $hasInstances) : $id; // substr for events (their ID includes event instance ID)
     }
 
-    // query parameter key/values on the collection
-    if (!empty($collection['meta']['query'])) {
-      foreach ($collection['meta']['query'] as $query) {
-        $key = 'data-' . $query['key'];
-        $attributes[$key] = $query['value'];
+    // passed in query data
+    if (!empty($collectionData['params'])) {
+      foreach ($collectionData['params'] as $key => $value) {
+        $key = 'data-' . $key;
+        $attributes[$key] = $value;
       }
     }
   
@@ -119,15 +139,27 @@ class Lazyload extends BaseExtension
     return $output;
   }
 
+  protected function compileParamsForEndpoints($collection, $data)
+  {
+    $order = array_slice($collection['order'], 0, $data['params']['per_page']);
+    $data['endpoints'] = $this->compileEndpoints($collection['endpoints'], $order);
+    $data['params']['order'] = implode(',', $order);
+    $data['params']['order_by'] = 'list';
+    $data['params']['source'] = 'all';
+
+    return $data;
+  }
+
+  /**
+   * Combine array of attributes into a string that can be placed
+   * into a div.
+   * @param array $attributes Ex: ["data-{attribute}" => "value"]
+   * @return void
+   */
   protected function compileAttributes($attributes)
   {
     return implode(' ', array_map(function ($key) use ($attributes) {
       $value = $attributes[$key];
-      if (is_array($value)) {
-        echo '<pre>'; print_r([
-          $key, $value
-        ]); echo '</pre>'; die();
-      }
       return "{$key}=\"{$value}\"";
     }, array_keys($attributes)));
   }

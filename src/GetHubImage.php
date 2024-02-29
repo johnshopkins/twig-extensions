@@ -16,24 +16,17 @@ class getHubImage extends BaseExtension
     'classes' => [],
 
     // show caption TRUE/FALSE
-    'showCaption' => true
+    'showCaption' => true,
+
+    // allow paragraphs in captions TRUE/FALSE
+    'allowCaptionParagraphs' => false
   ];
 
-  protected $imageBreakpoints = [
-    'min-width: 1680px',  // desktop
-    'min-width: 1280px',  // desktop
-    'min-width: 1024px',  // table landscape
-    'min-width: 863px',   // drastic breakpoint
-    'min-width: 768px',   // table portrait
-    'min-width: 640px',   // mobile landscape
-    'min-width: 412px',   // large module portrait
-    'min-width: 375px',   // regular modern iPhone portrait
-    ''                    // below 375px
-  ];
-
-  public function __construct($imageBreakpoints = [])
+  public function __construct($responsiveImageHelper, $imageBreakpoints = [])
   {
     parent::__construct();
+
+    $this->responsiveImageHelper = $responsiveImageHelper;
 
     if (!empty($imageBreakpoints)) {
       $this->imageBreakpoints = $imageBreakpoints;
@@ -79,19 +72,7 @@ class getHubImage extends BaseExtension
     ];
 
     if (!empty($options['responsiveSizes'])) {
-      $attributes['sizes'] = [];
-
-      for ($i = 0; $i < count($this->imageBreakpoints); $i++) {
-        $width = $this->imageBreakpoints[$i];
-        $size = $options['responsiveSizes'][$i];
-        if (!$size) {
-          continue;
-        }
-        $attributes['sizes'][] = !empty($width) ? "({$width}) {$size}px": "{$size}px";
-      }
-
-      $attributes['sizes'] = implode(', ', $attributes['sizes']);
-
+      $attributes['sizes'] = $this->responsiveImageHelper->getImageSizes($options['responsiveSizes']);
       $srcset = $options['srcset'] ?? 'scaled';
       $attributes['srcset'] = $image['srcsets'][$srcset];
     }
@@ -114,23 +95,37 @@ class getHubImage extends BaseExtension
       return '';
     }
 
-    $caption = $this->getCaption($image);
+    $classes = ['caption', 'column'];
+
+    $caption = $this->getCaption($image, $options);
     $credit = $this->getCredit($image);
 
     if (!$caption && !$credit) {
       return '';
     }
 
-    return '<div class="caption column">' . $caption . $credit . '</div>';
+    if ($caption) {
+      $classes[] = 'has-caption';
+    }
+
+    if ($credit) {
+      $classes[] = 'has-credit';
+    }
+
+    return '<div class="' . implode(' ', $classes) . '">' . $caption . $credit . '</div>';
   }
 
-  protected function getCaption($image)
+  protected function getCaption($image, $options)
   {
     if (empty($image['caption'])) {
       return '';
     }
 
-    return '<p><span class="visuallyhidden">Image caption: </span>' . strip_tags($image['caption'], '<i><b><strong><em><a>') . '</p>';
+    if (!$options['allowCaptionParagraphs']) {
+      return '<p><span class="visuallyhidden">Image caption: </span>' . strip_tags($image['caption'], '<i><b><strong><em><a>') . '</p>';
+    } else {
+      return '<span class="visuallyhidden">Image caption: </span>' . strip_tags($image['caption'], '<i><b><strong><em><a><p>');
+    }
   }
 
   protected function getCredit($image)
