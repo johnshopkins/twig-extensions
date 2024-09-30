@@ -8,6 +8,7 @@ class GetImage extends BaseExtension
 
   protected $defaults = [
     'size' => 'thumbnail',
+    'cropType' => 'soft',
     'responsiveSizes' => [],
     'attr' => []
   ];
@@ -33,19 +34,20 @@ class GetImage extends BaseExtension
 
     $id = is_object($image) ? $image->ID : $image['ID'];
 
-    // // default wordpress srcset
-    // // ensures that even thumbnails have them (by default, they don't)
-    // $options['attr']['srcset'] = wp_get_attachment_image_srcset($id);
+    // default wordpress srcset
+    // ensures that even thumbnails have them (by default, they don't)
+    $options['attr']['srcset'] = wp_get_attachment_image_srcset($id, $options['size']);
 
     if (!empty($options['responsiveSizes'])) {
 
       $options['attr']['sizes'] = $this->responsiveImageHelper->getImageSizes($options['responsiveSizes']);
 
     } else {
-      // // default wordpress sizes
-      // // ensures that even thumbnails have them (by default, they don't)
-      // $options['attr']['sizes'] = wp_get_attachment_image_sizes($id);
+      // default wordpress sizes
+      // ensures that even thumbnails have them (by default, they don't)
+      $options['attr']['sizes'] = wp_get_attachment_image_srcset($id, $options['size']);
     }
+
 
     return wp_get_attachment_image($id, $options['size'], false, $options['attr']);
   }
