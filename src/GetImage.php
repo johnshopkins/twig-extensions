@@ -32,7 +32,15 @@ class GetImage extends BaseExtension
 
     $options = array_merge($this->defaults, $options);
 
-    $id = is_object($image) ? $image->ID : $image['ID'];
+    $id = null;
+
+    if (is_object($image)) {
+      $id = $image->ID;
+    } elseif (is_array($image)) {
+      $id = $image['ID'];
+    } else {
+      $id = (int) $image;
+    }
 
     // default wordpress srcset
     // ensures that even thumbnails have them (by default, they don't)
