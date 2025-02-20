@@ -6,7 +6,7 @@ class Lazyload extends BaseExtension
 {
   protected $extensionName = 'lazyload';
 
-  protected $classes = ['bbload', 'force'];
+  protected $classes = [];
 
   protected $defaults = [
     'additionalData' => [], // additional data to send to JS
