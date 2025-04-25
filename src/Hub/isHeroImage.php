@@ -10,6 +10,10 @@ class IsHeroImage extends BaseExtension
 
   public function ext($object)
   {
-    return ($object['format'] === 'Impact Image Emphasis' || $object['hero_type'] === 'image') && !empty($object['_embedded']['image_impact']);
+    if ($object['type'] !== 'event') {
+      return (($object['format'] === 'Impact Image Emphasis') || $object['hero_type'] === 'image') && !empty($object['_embedded']['image_impact']);
+    } else {
+      return !empty($object['_embedded']['image_impact']);
+    }
   }
 }
