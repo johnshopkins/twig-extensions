@@ -10,7 +10,6 @@ class IsHeroImage extends BaseExtension
 
   public function ext($object)
   {
-    $isFeatureBeforeMigration = $object['format'] === 'feature' && $object['hero_type'] === null;
-    return (($isFeatureBeforeMigration || $object['format'] === 'Impact Image Emphasis') || $object['hero_type'] === 'image') && !empty($object['_embedded']['image_impact']);
+    return $object['hero_type'] === 'image' && !empty($object['_embedded']['image_impact']);
   }
 }
