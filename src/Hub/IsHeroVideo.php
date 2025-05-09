@@ -10,6 +10,6 @@ class IsHeroVideo extends BaseExtension
 
   public function ext($object)
   {
-    return $object['hero_type'] === 'video' && !empty($object['_embedded']['videos']);
+    return $object['hero_type'] === 'video' && !empty($object['_embedded']['assigned_video']);
   }
 }
