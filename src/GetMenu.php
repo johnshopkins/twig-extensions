@@ -62,6 +62,18 @@ class GetMenu extends BaseExtension
       $options['toggle'] = true;
     }
 
+    if ($menu === 'pages') {
+      return wp_page_menu([
+        'container' => false,
+        'echo' => false,
+        'depth' => $options['depth'],
+        'fallback_cb' => false,
+        'items_wrap' => $this->getItemsWrap($options),
+        'menu' => $menu,
+        'walker' => new CustomPageWalker($options)
+      ]);
+    }
+
     return wp_nav_menu([
       'container' => false,
       'echo' => false,

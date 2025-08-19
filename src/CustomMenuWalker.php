@@ -197,6 +197,7 @@ class CustomMenuWalker extends \Walker_Nav_Menu
 
   protected function maybeAddMoreClasses($classes, $menu_item)
   {
+    // a page (usually other than the actual active page) to force as the active page
     if ($this->options['forceActivePage'] && (int) $menu_item->object_id === $this->options['forceActivePage']) {
       $classes = array_merge($classes, ['current-page-ancestor', 'current-menu-ancestor', 'current-menu-parent']);
     }
